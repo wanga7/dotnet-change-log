@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChangelogPlayground", "ChangelogPlayground\ChangelogPlayground.csproj", "{6ED6A484-1F71-4E6B-ACF7-8ACE8B8FB985}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Changelog", "..\..\src\Changelog\Changelog.csproj", "{A5128946-53DA-458B-9906-E4D0BD8FD036}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Changelog.Tests", "..\..\tests\Changelog.Tests\Changelog.Tests.csproj", "{EF429AAB-9E24-4609-8CA2-A953BB0C84B0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6ED6A484-1F71-4E6B-ACF7-8ACE8B8FB985}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ED6A484-1F71-4E6B-ACF7-8ACE8B8FB985}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ED6A484-1F71-4E6B-ACF7-8ACE8B8FB985}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ED6A484-1F71-4E6B-ACF7-8ACE8B8FB985}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5128946-53DA-458B-9906-E4D0BD8FD036}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5128946-53DA-458B-9906-E4D0BD8FD036}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5128946-53DA-458B-9906-E4D0BD8FD036}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5128946-53DA-458B-9906-E4D0BD8FD036}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF429AAB-9E24-4609-8CA2-A953BB0C84B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF429AAB-9E24-4609-8CA2-A953BB0C84B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF429AAB-9E24-4609-8CA2-A953BB0C84B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF429AAB-9E24-4609-8CA2-A953BB0C84B0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
