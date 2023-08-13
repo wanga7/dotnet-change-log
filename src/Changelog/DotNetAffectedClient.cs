@@ -12,7 +12,7 @@ public class DotNetAffectedClient
         _workingDirectory = workingDirectory;
     }
 
-    public Result<bool> IsProjectAffect(string projectPath, string fromTarget, string toTarget,
+    public Result<bool> IsProjectAffected(string projectPath, string fromTarget, string toTarget,
         string excludedPattern = "")
     {
         var result = GetAffectedProjects(fromTarget, toTarget, excludedPattern);
