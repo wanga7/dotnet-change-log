@@ -1,11 +1,24 @@
-﻿using ChangelogPlayground;
+﻿using Changelog;
+using ChangelogPlayground;
 using CommandLine;
 
-Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(RunOptions).WithNotParsed(HandleParseError);
+Parser.Default
+    .ParseArguments<CommandLineOptions>(args)
+    .WithParsed(RunOptions)
+    .WithNotParsed(HandleParseError);
 
 static void RunOptions(CommandLineOptions commandLineOptions)
 {
     Console.WriteLine("Playground Started!");
+
+    ChangLogGenerator changLogGenerator =
+        new(commandLineOptions.RepoPath, commandLineOptions.ExcludedPattern);
+
+    changLogGenerator.GetChangeLog(
+        commandLineOptions.Project,
+        commandLineOptions.FromTag,
+        commandLineOptions.ToTag
+    );
 }
 
 static void HandleParseError(IEnumerable<Error> errors)

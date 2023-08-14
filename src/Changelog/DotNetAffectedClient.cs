@@ -6,39 +6,42 @@ namespace Changelog;
 public class DotNetAffectedClient
 {
     private readonly string _workingDirectory;
+    private readonly string _excludedPattern;
 
-    public DotNetAffectedClient(string workingDirectory)
+    public DotNetAffectedClient(string workingDirectory, string excludedPattern = "")
     {
         _workingDirectory = workingDirectory;
+        _excludedPattern = excludedPattern;
     }
 
-    public Result<bool> IsProjectAffected(string projectPath, string fromTarget, string toTarget,
-        string excludedPattern = "")
+    public Result<bool> IsProjectAffected(string projectPath, string fromTarget, string toTarget)
     {
-        var result = GetAffectedProjects(fromTarget, toTarget, excludedPattern);
-        if (result.IsFailure) return Result.Failure<bool>(result.Error);
+        Result<IReadOnlyList<string>> result = GetAffectedProjects(fromTarget, toTarget);
+        if (result.IsFailure)
+            return Result.Failure<bool>(result.Error);
 
         return Result.Success(result.Value.Any(p => p.Contains(projectPath)));
     }
 
-    private Result<IReadOnlyList<string>> GetAffectedProjects(string fromTarget, string toTarget,
-        string excludedPattern = "")
+    private Result<IReadOnlyList<string>> GetAffectedProjects(string fromTarget, string toTarget)
     {
         Process process = new();
 
-        var arguments = $"affected --from {fromTarget} --to {toTarget} --format text --dry-run";
-        if (!string.IsNullOrWhiteSpace(excludedPattern)) arguments += $" -e {excludedPattern}";
+        string arguments = $"affected --from {fromTarget} --to {toTarget} --format text --dry-run";
+        if (!string.IsNullOrWhiteSpace(_excludedPattern))
+            arguments += $" -e {_excludedPattern}";
 
-        ProcessStartInfo startInfo = new()
-        {
-            FileName = "dotnet",
-            Arguments = arguments,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = _workingDirectory
-        };
+        ProcessStartInfo startInfo =
+            new()
+            {
+                FileName = "dotnet",
+                Arguments = arguments,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = _workingDirectory
+            };
 
         process.StartInfo = startInfo;
 
@@ -46,11 +49,13 @@ public class DotNetAffectedClient
         List<string> errors = new();
         process.OutputDataReceived += (_, e) =>
         {
-            if (!string.IsNullOrWhiteSpace(e.Data)) affectedProjects.Add(e.Data);
+            if (!string.IsNullOrWhiteSpace(e.Data))
+                affectedProjects.Add(e.Data);
         };
         process.ErrorDataReceived += (_, e) =>
         {
-            if (!string.IsNullOrWhiteSpace(e.Data)) errors.Add(e.Data);
+            if (!string.IsNullOrWhiteSpace(e.Data))
+                errors.Add(e.Data);
         };
 
         process.Start();
@@ -59,7 +64,8 @@ public class DotNetAffectedClient
 
         process.WaitForExit();
 
-        if (errors.Count > 0) return Result.Failure<IReadOnlyList<string>>(string.Join(' ', errors));
+        if (errors.Count > 0)
+            return Result.Failure<IReadOnlyList<string>>(string.Join(' ', errors));
 
         return Result.Success<IReadOnlyList<string>>(affectedProjects.ToArray());
     }
