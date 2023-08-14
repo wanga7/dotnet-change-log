@@ -21,8 +21,8 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore src/Changelog/Changelog.csproj
     - name: Build
       run: dotnet build src/Changelog/Changelog.csproj --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test tests/Changelog.Tests/Changelog.Tests.csproj --no-build --verbosity normal
