@@ -5,8 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>default</LangVersion>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1"/>
     <PackageReference Include="CSharpFunctionalExtensions" Version="2.40.0" />
     <PackageReference Include="LibGit2Sharp" Version="0.27.2" />
   </ItemGroup>

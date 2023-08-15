@@ -1,6 +1,6 @@
 using CommandLine;
 
-namespace ChangelogPlayground;
+namespace Changelog;
 
 public class CommandLineOptions
 {
@@ -16,11 +16,8 @@ public class CommandLineOptions
     [Option('t', "to", Required = true, HelpText = "Ending git tag for Changelog")]
     public string ToTag { get; set; }
 
-    [Option(
-        'e',
-        "exclude",
-        Required = false,
-        HelpText = "Excluded projects pattern (dotnet Regular Expression that will be matched against each Project's Full Path, e.g. \".Tests.\")"
-    )]
+    [Option('e', "exclude", Required = false,
+        HelpText =
+            "Excluded projects pattern (dotnet Regular Expression that will be matched against each Project's Full Path, e.g. \".Tests.\")")]
     public string ExcludedPattern { get; set; }
 }
