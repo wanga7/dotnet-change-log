@@ -1,6 +1,6 @@
 using CommandLine;
 
-namespace Changelog;
+namespace DotNetChangelog;
 
 public class CommandLineOptions
 {

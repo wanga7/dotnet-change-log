@@ -1,6 +1,6 @@
 ﻿using LibGit2Sharp;
 
-namespace Changelog;
+namespace DotNetChangelog;
 
 public static class CommitExtensions
 {

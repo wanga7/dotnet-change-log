@@ -6,11 +6,24 @@
     <Nullable>enable</Nullable>
     <LangVersion>default</LangVersion>
     <OutputType>Exe</OutputType>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>dotnet-changelog</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <Version>0.1.0</Version>
+    <RootNamespace>DotNetChangelog</RootNamespace>
+    <Description>A .NET Tool for generating changelog based on .NET project dependencies, particularly useful for mono repos.</Description>
+    <PackageProjectUrl>https://github.com/wanga7/dotnet-changelog</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/wanga7/dotnet-changelog/blob/main/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/wanga7/dotnet-changelog</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1"/>
     <PackageReference Include="CSharpFunctionalExtensions" Version="2.40.0" />
     <PackageReference Include="LibGit2Sharp" Version="0.27.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
   <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
     <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />

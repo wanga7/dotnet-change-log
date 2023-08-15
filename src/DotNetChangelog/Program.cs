@@ -1,8 +1,9 @@
-﻿using Changelog;
-using CommandLine;
+﻿using CommandLine;
+using DotNetChangelog;
 
 Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(RunOptions)
     .WithNotParsed(HandleParseError);
+return;
 
 static void RunOptions(CommandLineOptions commandLineOptions)
 {

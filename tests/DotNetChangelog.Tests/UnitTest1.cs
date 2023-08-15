@@ -1,4 +1,4 @@
-namespace Changelog.Tests;
+namespace DotNetChangelog.Tests;
 
 public class Tests
 {

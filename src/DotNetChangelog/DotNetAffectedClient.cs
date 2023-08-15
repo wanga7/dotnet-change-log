@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using CSharpFunctionalExtensions;
 
-namespace Changelog;
+namespace DotNetChangelog;
 
 public class DotNetAffectedClient
 {

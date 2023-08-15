@@ -8,6 +8,7 @@
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
         <LangVersion>default</LangVersion>
+        <RootNamespace>DotNetChangelog.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Changelog\Changelog.csproj" />
+      <ProjectReference Include="..\..\src\DotNetChangelog\DotNetChangelog.csproj" />
     </ItemGroup>
 
 </Project>

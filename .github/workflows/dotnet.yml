@@ -19,8 +19,8 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore Changelog.sln
+      run: dotnet restore DotNetChangelog.sln
     - name: Build
-      run: dotnet build --no-restore --configuration Release Changelog.sln
+      run: dotnet build --no-restore --configuration Release DotNetChangelog.sln
     - name: Test
-      run: dotnet test --no-build --verbosity normal --configuration Release Changelog.sln
+      run: dotnet test --no-build --verbosity normal --configuration Release DotNetChangelog.sln

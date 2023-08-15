@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Changelog", "src\Changelog\Changelog.csproj", "{D135CFC6-2DEF-4524-9A56-7181692F6EDB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetChangelog", "src\DotNetChangelog\DotNetChangelog.csproj", "{D135CFC6-2DEF-4524-9A56-7181692F6EDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Changelog.Tests", "tests\Changelog.Tests\Changelog.Tests.csproj", "{160CBD90-EF72-4ACD-B55F-C7BCAD418EC2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetChangelog.Tests", "tests\DotNetChangelog.Tests\DotNetChangelog.Tests.csproj", "{160CBD90-EF72-4ACD-B55F-C7BCAD418EC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
