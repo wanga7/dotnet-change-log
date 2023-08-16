@@ -7,7 +7,7 @@
     <LangVersion>default</LangVersion>
     <OutputType>Exe</OutputType>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>dotnet-changelog</ToolCommandName>
+    <ToolCommandName>dotnet-change-log</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <PackageId>dotnet-change-log</PackageId>
     <Version>0.4.0</Version>
