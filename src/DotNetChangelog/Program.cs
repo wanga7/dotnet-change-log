@@ -1,10 +1,7 @@
 ﻿using CommandLine;
 using DotNetChangelog;
 
-Parser.Default
-    .ParseArguments<CommandLineOptions>(args)
-    .WithParsed(RunOptions)
-    .WithNotParsed(HandleParseError);
+Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(RunOptions);
 return;
 
 static void RunOptions(CommandLineOptions commandLineOptions)
@@ -19,9 +16,4 @@ static void RunOptions(CommandLineOptions commandLineOptions)
         commandLineOptions.FromTag,
         commandLineOptions.ToTag
     );
-}
-
-static void HandleParseError(IEnumerable<Error> errors)
-{
-    Console.Error.WriteLine($"Invalid cmd args: {string.Join(Environment.NewLine, errors)}");
 }
