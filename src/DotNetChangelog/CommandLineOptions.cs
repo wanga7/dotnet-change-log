@@ -37,7 +37,7 @@ public class CommandLineOptions
         'm',
         "output-format",
         Required = false,
-        HelpText = "Changelog output format (Text/Json/Markdown, default to Console)"
+        HelpText = "Changelog output format (Console/Text/Json/Markdown, default to Console)"
     )]
     public OutputFormat OutputFormat { get; set; } = OutputFormat.Console;
 }
