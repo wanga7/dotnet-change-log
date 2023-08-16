@@ -2,12 +2,12 @@
 
 namespace DotNetChangelog;
 
-public class ChangLogGenerator
+public class ChangeLogGenerator
 {
     private readonly GitHistory _gitHistory;
     private readonly DotNetAffectedClient _dotNetAffectedClient;
 
-    public ChangLogGenerator(string repoPath, string excludedPattern)
+    public ChangeLogGenerator(string repoPath, string excludedPattern)
     {
         _gitHistory = new(repoPath);
         _dotNetAffectedClient = new(repoPath, excludedPattern);
