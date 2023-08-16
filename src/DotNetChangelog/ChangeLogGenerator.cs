@@ -1,4 +1,5 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System.Collections.Concurrent;
+using CSharpFunctionalExtensions;
 
 namespace DotNetChangelog;
 
@@ -21,28 +22,32 @@ public class ChangeLogGenerator
         Console.WriteLine($"Found {commitsDesc.Count} commits");
 
         Console.WriteLine($"Determining commits affecting {project}...");
-        List<GitCommit> changeLog = new();
-        foreach (GitCommit commit in commitsDesc)
-        {
-            Result<bool> result = _dotNetAffectedClient.IsProjectAffected(
-                project,
-                commit.ParentHash,
-                commit.Hash
-            );
-
-            if (result.IsFailure)
+        ConcurrentDictionary<string, bool> commitsStates = new();
+        Parallel.ForEach(
+            commitsDesc,
+            commit =>
             {
-                Console.WriteLine(
-                    $"Failed to analyze affected projects from {commit}: {result.Error}"
+                Result<bool> result = _dotNetAffectedClient.IsProjectAffected(
+                    project,
+                    commit.ParentHash,
+                    commit.Hash
                 );
-            }
-            else if (result.Value)
-            {
-                changeLog.Add(commit);
-                Console.WriteLine($"{commit.Hash} {commit.ShortMessage}");
-            }
-        }
 
-        return changeLog;
+                if (result.IsFailure)
+                {
+                    Console.WriteLine(
+                        $"Failed to analyze affected projects from {commit}: {result.Error}"
+                    );
+                }
+                else
+                {
+                    commitsStates[commit.Hash] = result.Value;
+                }
+            }
+        );
+
+        return commitsDesc
+            .Where(c => commitsStates.TryGetValue(c.Hash, out bool isAffected) && isAffected)
+            .ToArray();
     }
 }
