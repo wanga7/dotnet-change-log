@@ -1,4 +1,6 @@
-﻿using LibGit2Sharp;
+﻿using DotNetChangelog.Domain;
+using DotNetChangelog.Utilities;
+using LibGit2Sharp;
 
 namespace DotNetChangelog;
 

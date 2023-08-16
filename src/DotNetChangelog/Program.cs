@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics;
 using CommandLine;
+using CSharpFunctionalExtensions;
 using DotNetChangelog;
+using DotNetChangelog.Domain;
+using DotNetChangelog.IO;
 
 Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(RunOptions);
 return;
@@ -8,20 +11,45 @@ return;
 static void RunOptions(CommandLineOptions commandLineOptions)
 {
     Console.WriteLine("Changelog Started!");
-
     Stopwatch stopwatch = Stopwatch.StartNew();
 
-    ChangeLogGenerator changeLogGenerator =
-        new(commandLineOptions.RepoPath, commandLineOptions.ExcludedPattern);
+    ChangelogGenerator changelogGenerator =
+        new(commandLineOptions.RepoDirectory, commandLineOptions.ExcludedPattern);
 
-    IReadOnlyList<GitCommit> affectedCommits = changeLogGenerator.GetChangeLog(
+    Result<Changelog> result = changelogGenerator.GetChangelog(
         commandLineOptions.Project,
         commandLineOptions.FromTag,
         commandLineOptions.ToTag
     );
 
+    if (result.IsSuccess)
+    {
+        OutputChangelog(result.Value, commandLineOptions);
+    }
+    else
+    {
+        Console.WriteLine($"Failed to generate changelog: {result.Error}"); // TODO: return error code for cli
+    }
+
     stopwatch.Stop();
-    Console.WriteLine(
-        $"Found {affectedCommits.Count} commits affecting {commandLineOptions.Project} in {stopwatch.Elapsed.TotalSeconds:N1}s"
+    Console.WriteLine($"Total execution time: {stopwatch.Elapsed.TotalSeconds:N1}s");
+}
+
+static void OutputChangelog(Changelog changelog, CommandLineOptions commandLineOptions)
+{
+    ChangelogWriter changelogWriter = WriterFactory.Create(
+        commandLineOptions.RepoDirectory,
+        commandLineOptions.OutputDirectory,
+        commandLineOptions.OutputFormat
     );
+
+    Result<string> result = changelogWriter.Write(changelog);
+    if (result.IsSuccess)
+    {
+        Console.WriteLine($"Changelog dumped to {result.Value}");
+    }
+    else
+    {
+        Console.WriteLine($"Failed to dump changelog: {result.Error}");
+    }
 }

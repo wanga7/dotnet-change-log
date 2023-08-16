@@ -1,10 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using CSharpFunctionalExtensions;
+using DotNetChangelog.Domain;
 using ShellProgressBar;
 
 namespace DotNetChangelog;
 
-public class ChangeLogGenerator
+public class ChangelogGenerator
 {
     private static readonly ProgressBarOptions ProgressBarOptions =
         new() { DisplayTimeInRealTime = false };
@@ -12,13 +13,13 @@ public class ChangeLogGenerator
     private readonly GitHistory _gitHistory;
     private readonly DotNetAffectedClient _dotNetAffectedClient;
 
-    public ChangeLogGenerator(string repoPath, string excludedPattern)
+    public ChangelogGenerator(string repoPath, string excludedPattern)
     {
         _gitHistory = new(repoPath);
         _dotNetAffectedClient = new(repoPath, excludedPattern);
     }
 
-    public IReadOnlyList<GitCommit> GetChangeLog(string project, string fromTag, string toTag)
+    public Result<Changelog> GetChangelog(string project, string fromTag, string toTag)
     {
         Console.WriteLine($"Analyzing changelog for {project} from {fromTag} to {toTag}...");
 
@@ -27,14 +28,13 @@ public class ChangeLogGenerator
 
         Console.WriteLine($"Determining commits affecting {project}...");
         ConcurrentDictionary<string, bool> commitsStates = new();
-
+        string error = string.Empty;
+        
         using (
             ProgressBar progressBar = new(commitsDesc.Count, "Commit analysis", ProgressBarOptions)
         )
         {
-            Parallel.ForEach(
-                commitsDesc,
-                commit =>
+            Parallel.ForEach(commitsDesc, (commit, state) =>
                 {
                     Result<bool> result = _dotNetAffectedClient.IsProjectAffected(
                         project,
@@ -44,9 +44,8 @@ public class ChangeLogGenerator
 
                     if (result.IsFailure)
                     {
-                        Console.WriteLine(
-                            $"Failed to analyze affected projects from {commit}: {result.Error}"
-                        );
+                        error = $"Failed to analyze affected projects from {commit}: {result.Error}";
+                        state.Stop();
                     }
                     else
                     {
@@ -58,8 +57,10 @@ public class ChangeLogGenerator
             );
         }
 
-        return commitsDesc
-            .Where(c => commitsStates.TryGetValue(c.Hash, out bool isAffected) && isAffected)
-            .ToArray();
+        return string.IsNullOrEmpty(error)
+            ? Result.Success(new Changelog(fromTag, toTag,
+                commitsDesc.Where(c => commitsStates.TryGetValue(c.Hash, out bool isAffected) && isAffected)
+                    .ToArray()))
+            : Result.Failure<Changelog>(error);
     }
 }
