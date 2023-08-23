@@ -1,11 +1,17 @@
-﻿using DotNetChangelog.Domain;
+﻿using CSharpFunctionalExtensions;
+using DotNetChangelog.Domain;
+using DotNetChangelog.IO;
 using DotNetChangelog.Utilities;
 using LibGit2Sharp;
+using ShellProgressBar;
 
 namespace DotNetChangelog;
 
 public class GitHistory
 {
+    private static readonly IComparer<VersionInfo> OfficialVersionComparer =
+        new OfficialVersionComparerDesc();
+
     private readonly string _repoPath;
 
     public GitHistory(string repoPath)
@@ -41,5 +47,50 @@ public class GitHistory
         commits.RemoveAt(0);
 
         return commits;
+    }
+
+    public SortedList<VersionInfo, Tag> GetTagsDesc(string pattern)
+    {
+        SortedList<VersionInfo, Tag> sortedTags = new(OfficialVersionComparer);
+
+        using (Repository repo = new(_repoPath))
+        {
+            TagCollection tags = repo.Tags;
+            using (
+                ProgressBar progressBar =
+                    new(tags.Count(), "Analyzing tags", ProgressBarConfigs.DefaultOptions)
+            )
+            {
+                foreach (Tag tag in tags)
+                {
+                    if (!tag.Matches(pattern))
+                    {
+                        progressBar.Tick();
+                        continue;
+                    }
+
+                    Result<VersionInfo> versionInfo = tag.ExtractVersionInfo();
+                    if (versionInfo.IsFailure)
+                    {
+                        Console.WriteLine(
+                            $"Failed to extract version info from tag \"{tag.FriendlyName}\": {versionInfo.Error}"
+                        );
+                        progressBar.Tick();
+                        continue;
+                    }
+
+                    if (versionInfo.Value.IsPreRelease())
+                    {
+                        progressBar.Tick();
+                        continue;
+                    }
+
+                    sortedTags.Add(versionInfo.Value, tag);
+                    progressBar.Tick();
+                }
+            }
+        }
+
+        return sortedTags;
     }
 }

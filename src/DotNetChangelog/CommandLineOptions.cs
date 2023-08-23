@@ -5,8 +5,13 @@ namespace DotNetChangelog;
 
 public class CommandLineOptions
 {
-    [Option('r', "repo-dir", Required = true, HelpText = "Repo directory")]
-    public string RepoDirectory { get; set; }
+    [Option(
+        'r',
+        "repo-dir",
+        Required = true,
+        HelpText = "Repo directory (default to current working directory)"
+    )]
+    public string RepoDirectory { get; set; } = ".";
 
     [Option('p', "project", Required = true, HelpText = "Project for Changelog (e.g. App.csproj)")]
     public string Project { get; set; }
@@ -16,6 +21,14 @@ public class CommandLineOptions
 
     [Option('t', "to", Required = true, HelpText = "Ending git tag for Changelog")]
     public string ToTag { get; set; }
+
+    [Option(
+        'c',
+        "change-log-mode",
+        Required = false,
+        HelpText = "Type of changelog to generate, Direct/Continuous (default to Direct)"
+    )]
+    public ChangelogMode ChangelogMode { get; set; } = ChangelogMode.Direct;
 
     [Option(
         'e',
