@@ -16,7 +16,7 @@ static void RunOptions(CommandLineOptions commandLineOptions)
     ChangelogGenerator changelogGenerator =
         new(commandLineOptions.RepoDirectory, commandLineOptions.ExcludedPattern);
 
-    Result<Changelog> result = changelogGenerator.GetChangelog(
+    Result<Changelog> result = changelogGenerator.GetDirectChangelog(
         commandLineOptions.Project,
         commandLineOptions.FromTag,
         commandLineOptions.ToTag

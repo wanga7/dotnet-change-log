@@ -17,7 +17,7 @@ public class ChangelogGenerator
         _dotNetAffectedClient = new(repoPath, excludedPattern);
     }
 
-    public Result<Changelog> GetChangelog(string project, string fromTag, string toTag)
+    public Result<Changelog> GetDirectChangelog(string project, string fromTag, string toTag)
     {
         Console.WriteLine($"Analyzing changelog for {project} from {fromTag} to {toTag}...");
 
@@ -30,7 +30,11 @@ public class ChangelogGenerator
 
         using (
             ProgressBar progressBar =
-                new(commitsDesc.Count, "Analyzing commits", ProgressBarConfigs.DefaultOptions)
+                new(
+                    commitsDesc.Count,
+                    $"Analyzing commits {fromTag}...{toTag}",
+                    ProgressBarConfigs.DefaultOptions
+                )
         )
         {
             Parallel.ForEach(
@@ -73,5 +77,64 @@ public class ChangelogGenerator
                 )
             )
             : Result.Failure<Changelog>(error);
+    }
+
+    public Result<ContinuousChangelog> GetContinuousChangelog(
+        string project,
+        string fromTag,
+        string toTag,
+        string tagPattern
+    )
+    {
+        IReadOnlyList<VersionTag> tagsDesc = _gitHistory.GetVersionTagsDesc(
+            tagPattern,
+            fromTag,
+            toTag
+        );
+        if (tagsDesc.Count == 0)
+        {
+            return Result.Failure<ContinuousChangelog>("no tag match");
+        }
+
+        List<Changelog> changelogs = new();
+        for (int i = 0; i < tagsDesc.Count - 1; i++)
+        {
+            VersionTag toVersionTag = tagsDesc[i];
+
+            // minor version is compared against minor version, patch version is compared against patch version
+            VersionTag fromVersionTag = toVersionTag.IsPatchVersion()
+                ? tagsDesc[i + 1]
+                : GetPreviousMinorVersion(i);
+
+            Result<Changelog> directChangelogResult = GetDirectChangelog(
+                project,
+                fromVersionTag.TagName,
+                toVersionTag.TagName
+            );
+
+            if (directChangelogResult.IsFailure)
+            {
+                return Result.Failure<ContinuousChangelog>(
+                    $"failed to generate direct changelog from \"{fromVersionTag.TagName}\" to \"{toVersionTag.TagName}\": {directChangelogResult.Error}"
+                );
+            }
+
+            changelogs.Add(directChangelogResult.Value);
+        }
+
+        return Result.Success(new ContinuousChangelog(changelogs));
+
+        VersionTag GetPreviousMinorVersion(int toVersionIndex)
+        {
+            for (int j = toVersionIndex + 1; j < tagsDesc.Count; j++)
+            {
+                if (!tagsDesc[j].IsPatchVersion())
+                {
+                    return tagsDesc[j];
+                }
+            }
+
+            return tagsDesc[^1];
+        }
     }
 }

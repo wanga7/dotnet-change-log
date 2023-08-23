@@ -31,6 +31,14 @@ public class CommandLineOptions
     public ChangelogMode ChangelogMode { get; set; } = ChangelogMode.Direct;
 
     [Option(
+        'x',
+        "tag-regex",
+        Required = false,
+        HelpText = "Regex pattern used to filter tags for target project (only used in Continuous changelog mode)"
+    )]
+    public string TagRegex { get; set; } = string.Empty;
+
+    [Option(
         'e',
         "exclude",
         Required = false,

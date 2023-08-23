@@ -7,3 +7,5 @@ public record Changelog(string FromTag, string ToTag, IReadOnlyList<GitCommit> C
         return $"{FromTag}...{ToTag}: {Commits.Count} commits";
     }
 }
+
+public record ContinuousChangelog(IReadOnlyList<Changelog> SortedChangelogs);

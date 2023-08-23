@@ -1,15 +1,13 @@
 ﻿using CSharpFunctionalExtensions;
 using DotNetChangelog.Domain;
-using DotNetChangelog.IO;
 using DotNetChangelog.Utilities;
 using LibGit2Sharp;
-using ShellProgressBar;
 
 namespace DotNetChangelog;
 
 public class GitHistory
 {
-    private static readonly IComparer<VersionInfo> OfficialVersionComparer =
+    private static readonly IComparer<VersionTag> OfficialVersionComparerDesc =
         new OfficialVersionComparerDesc();
 
     private readonly string _repoPath;
@@ -49,48 +47,70 @@ public class GitHistory
         return commits;
     }
 
-    public SortedList<VersionInfo, Tag> GetTagsDesc(string pattern)
+    public IReadOnlyList<VersionTag> GetVersionTagsDesc(
+        string pattern,
+        string fromTagName,
+        string toTagName
+    )
     {
-        SortedList<VersionInfo, Tag> sortedTags = new(OfficialVersionComparer);
+        using Repository repo = new(_repoPath);
+        TagCollection tags = repo.Tags;
 
-        using (Repository repo = new(_repoPath))
+        Tag fromTag = tags[fromTagName];
+        Tag toTag = tags[toTagName];
+        Result<VersionTag> fromTagVersionInfo = fromTag.ToVersionTag();
+        Result<VersionTag> toTagVersionInfo = toTag.ToVersionTag();
+
+        if (fromTagVersionInfo.IsFailure)
         {
-            TagCollection tags = repo.Tags;
-            using (
-                ProgressBar progressBar =
-                    new(tags.Count(), "Analyzing tags", ProgressBarConfigs.DefaultOptions)
-            )
+            Console.WriteLine(
+                $"Failed to extract version info from tag \"{fromTag.FriendlyName}\": {fromTagVersionInfo.Error}"
+            );
+            return Array.Empty<VersionTag>();
+        }
+
+        if (toTagVersionInfo.IsFailure)
+        {
+            Console.WriteLine(
+                $"Failed to extract version info from tag \"{toTag.FriendlyName}\": {toTagVersionInfo.Error}"
+            );
+            return Array.Empty<VersionTag>();
+        }
+
+        SortedList<VersionTag, VersionTag> sortedTags = new(OfficialVersionComparerDesc);
+        foreach (Tag tag in tags)
+        {
+            if (!tag.Matches(pattern))
             {
-                foreach (Tag tag in tags)
-                {
-                    if (!tag.Matches(pattern))
-                    {
-                        progressBar.Tick();
-                        continue;
-                    }
+                continue;
+            }
 
-                    Result<VersionInfo> versionInfo = tag.ExtractVersionInfo();
-                    if (versionInfo.IsFailure)
-                    {
-                        Console.WriteLine(
-                            $"Failed to extract version info from tag \"{tag.FriendlyName}\": {versionInfo.Error}"
-                        );
-                        progressBar.Tick();
-                        continue;
-                    }
+            Result<VersionTag> versionTag = tag.ToVersionTag();
+            if (versionTag.IsFailure)
+            {
+                Console.WriteLine(
+                    $"Failed to extract version from tag \"{tag.FriendlyName}\": {versionTag.Error}"
+                );
+                continue;
+            }
 
-                    if (versionInfo.Value.IsPreRelease())
-                    {
-                        progressBar.Tick();
-                        continue;
-                    }
+            if (versionTag.Value.IsPreRelease())
+            {
+                continue;
+            }
 
-                    sortedTags.Add(versionInfo.Value, tag);
-                    progressBar.Tick();
-                }
+            if (IsBetween(versionTag.Value, fromTagVersionInfo.Value, toTagVersionInfo.Value))
+            {
+                sortedTags.Add(versionTag.Value, versionTag.Value);
             }
         }
 
-        return sortedTags;
+        return sortedTags.Select(t => t.Value).ToArray();
+    }
+
+    private static bool IsBetween(VersionTag subject, VersionTag fromVersion, VersionTag toVersion)
+    {
+        return OfficialVersionComparerDesc.Compare(subject, fromVersion) <= 0
+            && OfficialVersionComparerDesc.Compare(subject, toVersion) >= 0;
     }
 }
