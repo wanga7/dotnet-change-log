@@ -1,4 +1,4 @@
-# dotnet-changelog
+# dotnet-change-log
 
 A .NET Tool for generating changelog based on .NET project dependencies, particularly useful for mono repos.
 
