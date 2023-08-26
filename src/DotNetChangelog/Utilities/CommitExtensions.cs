@@ -15,5 +15,5 @@ public static class CommitExtensions
         };
     }
 
-    public static string Format(this GitCommit commit) => $"{commit.Hash} {commit.ShortMessage}";
+    public static string Format(this GitCommit commit) => $"{commit.ShortMessage} ({commit.Hash})";
 }

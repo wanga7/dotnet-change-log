@@ -1,21 +1,28 @@
 ﻿using CSharpFunctionalExtensions;
 using DotNetChangelog.Domain;
-using DotNetChangelog.Utilities;
 
 namespace DotNetChangelog.IO;
 
-public class ConsoleWriter : ChangelogWriter
+public class ConsoleWriter : TextWriter
 {
     public ConsoleWriter(string repoDirectory)
         : base(repoDirectory, string.Empty) { }
 
     public override Result<string> Write(Changelog changelog)
     {
-        Console.WriteLine(changelog.GetSummary());
-
-        foreach (GitCommit commit in changelog.Commits)
+        foreach (string line in GetLines(changelog))
         {
-            Console.WriteLine(commit.Format());
+            Console.WriteLine(line);
+        }
+
+        return Result.Success("console");
+    }
+
+    public override Result<string> Write(ContinuousChangelog continuousChangelog)
+    {
+        foreach (string line in GetLines(continuousChangelog))
+        {
+            Console.WriteLine(line);
         }
 
         return Result.Success("console");

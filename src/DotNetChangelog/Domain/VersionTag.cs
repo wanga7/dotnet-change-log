@@ -32,6 +32,14 @@ public class OfficialVersionComparerDesc : IComparer<VersionTag>
 
 public static class VersionTagExtensions
 {
+    public static string GetVersionInfo(this VersionTag versionTag)
+    {
+        int index = versionTag.TagName.IndexOf(versionTag.Version, StringComparison.Ordinal);
+        return index == -1
+            ? $"{versionTag.Version} {versionTag.Suffix}"
+            : versionTag.TagName[index..];
+    }
+
     public static bool IsPreRelease(this VersionTag versionTag) =>
         !string.IsNullOrEmpty(versionTag.Suffix);
 
@@ -40,6 +48,9 @@ public static class VersionTagExtensions
         Version version = new(versionTag.Version);
         return version.Build != 0 || version.Revision != 0;
     }
+
+    public static bool IsNormalVersion(this VersionTag versionTag) =>
+        !versionTag.IsPatchVersion() && !versionTag.IsPreRelease();
 
     public static bool BelongsToTheSameMinorVersion(this VersionTag lhs, VersionTag rhs)
     {

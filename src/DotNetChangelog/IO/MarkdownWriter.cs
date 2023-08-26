@@ -9,11 +9,13 @@ public class MarkdownWriter : ChangelogWriter
     public MarkdownWriter(string repoDirectory, string outputDirectory)
         : base(repoDirectory, outputDirectory) { }
 
-    public override Result<string> Write(Changelog changelog)
-    {
-        List<string> lines = new() { FormatAsH1(changelog.GetSummary()) };
-        lines.AddRange(changelog.Commits.Select(FormatCommit));
+    public override Result<string> Write(Changelog changelog) => Write(GetLines(changelog));
 
+    public override Result<string> Write(ContinuousChangelog continuousChangelog) =>
+        Write(GetLines(continuousChangelog));
+
+    private Result<string> Write(IReadOnlyList<string> lines)
+    {
         string file = Path.Combine(_outputDirectory, FileName + ".md");
 
         try
@@ -26,6 +28,31 @@ public class MarkdownWriter : ChangelogWriter
         }
 
         return Result.Success(Path.GetFullPath(file));
+    }
+
+    private static IReadOnlyList<string> GetLines(Changelog changelog)
+    {
+        List<string> lines = new() { FormatAsH1(changelog.GetTitleForDirectChangelog()) };
+        lines.AddRange(changelog.Commits.Select(FormatCommit));
+        return lines;
+    }
+
+    private static IReadOnlyList<string> GetLines(ContinuousChangelog continuousChangelog)
+    {
+        List<string> lines = new();
+        IReadOnlyList<Changelog> changelogs = continuousChangelog.SortedChangelogs;
+        foreach ((_, VersionTag toTag, IReadOnlyList<GitCommit> commits) in changelogs)
+        {
+            lines.Add(
+                toTag.IsNormalVersion()
+                    ? FormatAsH1(toTag.GetVersionInfo())
+                    : FormatAsH2(toTag.GetVersionInfo())
+            );
+            lines.AddRange(commits.Select(FormatCommit));
+            lines.Add(string.Empty);
+        }
+
+        return lines;
     }
 
     private static string FormatCommit(GitCommit commit)
@@ -44,6 +71,8 @@ public class MarkdownWriter : ChangelogWriter
     }
 
     private static string FormatAsH1(string text) => $"# {text}";
+
+    private static string FormatAsH2(string text) => $"## {text}";
 
     private static string FormatAsBulletPoint(string text) => $"* {text}";
 

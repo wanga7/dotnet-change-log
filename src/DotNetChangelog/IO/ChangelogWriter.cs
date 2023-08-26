@@ -15,4 +15,6 @@ public abstract class ChangelogWriter
     }
 
     public abstract Result<string> Write(Changelog changelog);
+
+    public abstract Result<string> Write(ContinuousChangelog continuousChangelog);
 }

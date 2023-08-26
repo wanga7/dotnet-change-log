@@ -2,6 +2,7 @@
 using CSharpFunctionalExtensions;
 using DotNetChangelog.Domain;
 using DotNetChangelog.IO;
+using DotNetChangelog.Utilities;
 using ShellProgressBar;
 
 namespace DotNetChangelog;
@@ -20,6 +21,18 @@ public class ChangelogGenerator
     public Result<Changelog> GetDirectChangelog(string project, string fromTag, string toTag)
     {
         Console.WriteLine($"Analyzing changelog for {project} from {fromTag} to {toTag}...");
+
+        Result<VersionTag> fromVersionTag = fromTag.ToVersionTag();
+        if (fromVersionTag.IsFailure)
+        {
+            return Result.Failure<Changelog>($"invalid tag \"{fromTag}\": {fromVersionTag.Error}");
+        }
+
+        Result<VersionTag> toVersionTag = toTag.ToVersionTag();
+        if (toVersionTag.IsFailure)
+        {
+            return Result.Failure<Changelog>($"invalid tag \"{toTag}\": {toVersionTag.Error}");
+        }
 
         IReadOnlyList<GitCommit> commitsDesc = _gitHistory.GetHistoryDesc(fromTag, toTag);
         Console.WriteLine($"Found {commitsDesc.Count} commits");
@@ -66,8 +79,8 @@ public class ChangelogGenerator
         return string.IsNullOrEmpty(error)
             ? Result.Success(
                 new Changelog(
-                    fromTag,
-                    toTag,
+                    fromVersionTag.Value,
+                    toVersionTag.Value,
                     commitsDesc
                         .Where(
                             c =>

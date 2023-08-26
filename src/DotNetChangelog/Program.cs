@@ -8,48 +8,100 @@ using DotNetChangelog.IO;
 Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(RunOptions);
 return;
 
-static void RunOptions(CommandLineOptions commandLineOptions)
+static void RunOptions(CommandLineOptions options)
 {
     Console.WriteLine("Changelog Started!");
     Stopwatch stopwatch = Stopwatch.StartNew();
 
-    ChangelogGenerator changelogGenerator =
-        new(commandLineOptions.RepoDirectory, commandLineOptions.ExcludedPattern);
+    ChangelogGenerator changelogGenerator = new(options.RepoDirectory, options.ExcludedPattern);
 
-    Result<Changelog> result = changelogGenerator.GetDirectChangelog(
-        commandLineOptions.Project,
-        commandLineOptions.FromTag,
-        commandLineOptions.ToTag
-    );
-
-    if (result.IsSuccess)
+    if (options.ChangelogMode == ChangelogMode.Direct)
     {
-        OutputChangelog(result.Value, commandLineOptions);
+        HandleDirectChangelogProcessing(changelogGenerator, options);
     }
     else
     {
-        Console.WriteLine($"Failed to generate changelog: {result.Error}"); // TODO: return error code for cli
+        HandleContinuousChangelogProcessing(changelogGenerator, options);
     }
 
     stopwatch.Stop();
     Console.WriteLine($"Total execution time: {stopwatch.Elapsed.TotalSeconds:N1}s");
 }
 
-static void OutputChangelog(Changelog changelog, CommandLineOptions commandLineOptions)
+static void HandleContinuousChangelogProcessing(
+    ChangelogGenerator changelogGenerator,
+    CommandLineOptions options
+)
 {
-    ChangelogWriter changelogWriter = WriterFactory.Create(
-        commandLineOptions.RepoDirectory,
-        commandLineOptions.OutputDirectory,
-        commandLineOptions.OutputFormat
+    Result<ContinuousChangelog> result = changelogGenerator.GetContinuousChangelog(
+        options.Project,
+        options.FromTag,
+        options.ToTag,
+        options.TagRegex
     );
 
-    Result<string> result = changelogWriter.Write(changelog);
     if (result.IsSuccess)
     {
-        Console.WriteLine($"Changelog dumped to {result.Value}");
+        OutputContinuousChangelog(result.Value, options);
     }
     else
     {
-        Console.WriteLine($"Failed to dump changelog: {result.Error}");
+        Console.WriteLine($"Failed to generate changelog: {result.Error}"); // TODO: return error code for cli
     }
+}
+
+static void HandleDirectChangelogProcessing(
+    ChangelogGenerator changelogGenerator,
+    CommandLineOptions options
+)
+{
+    Result<Changelog> result = changelogGenerator.GetDirectChangelog(
+        options.Project,
+        options.FromTag,
+        options.ToTag
+    );
+
+    if (result.IsSuccess)
+    {
+        OutputChangelog(result.Value, options);
+    }
+    else
+    {
+        Console.WriteLine($"Failed to generate changelog: {result.Error}"); // TODO: return error code for cli
+    }
+}
+
+static void OutputChangelog(Changelog changelog, CommandLineOptions options)
+{
+    ChangelogWriter changelogWriter = WriterFactory.Create(
+        options.RepoDirectory,
+        options.OutputDirectory,
+        options.OutputFormat
+    );
+
+    Result<string> result = changelogWriter.Write(changelog);
+    Console.WriteLine(
+        result.IsSuccess
+            ? $"Changelog dumped to {result.Value}"
+            : $"Failed to dump changelog: {result.Error}"
+    );
+}
+
+static void OutputContinuousChangelog(
+    ContinuousChangelog continuousChangelog,
+    CommandLineOptions options
+)
+{
+    ChangelogWriter changelogWriter = WriterFactory.Create(
+        options.RepoDirectory,
+        options.OutputDirectory,
+        options.OutputFormat
+    );
+
+    Result<string> result = changelogWriter.Write(continuousChangelog);
+    Console.WriteLine(
+        result.IsSuccess
+            ? $"Changelog dumped to {result.Value}"
+            : $"Failed to dump changelog: {result.Error}"
+    );
 }

@@ -13,7 +13,12 @@ public static class GitTagExtensions
 
     public static Result<VersionTag> ToVersionTag(this Tag tag)
     {
-        Match match = VersionTagPattern.Match(tag.FriendlyName);
+        return tag.FriendlyName.ToVersionTag();
+    }
+
+    public static Result<VersionTag> ToVersionTag(this string tagName)
+    {
+        Match match = VersionTagPattern.Match(tagName);
 
         if (!match.Success)
         {
@@ -24,7 +29,7 @@ public static class GitTagExtensions
         string version = match.Groups[2].Value;
         string suffix = match.Groups[4].Value;
 
-        return Result.Success(new VersionTag(prefix, version, suffix, tag.FriendlyName));
+        return Result.Success(new VersionTag(prefix, version, suffix, tagName));
     }
 
     public static bool Matches(this Tag tag, string pattern)

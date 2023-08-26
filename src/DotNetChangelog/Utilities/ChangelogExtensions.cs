@@ -4,6 +4,9 @@ namespace DotNetChangelog.Utilities;
 
 public static class ChangelogExtensions
 {
-    public static string GetSummary(this Changelog changelog) =>
-        $"{changelog.FromTag}...{changelog.ToTag}";
+    public static string GetTitleForDirectChangelog(this Changelog changelog) =>
+        $"{changelog.FromTag.GetVersionInfo()}...{changelog.ToTag.GetVersionInfo()}";
+
+    public static string GetTitleForContinuousChangelog(this Changelog changelog) =>
+        changelog.ToTag.GetVersionInfo();
 }
