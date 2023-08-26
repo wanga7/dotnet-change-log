@@ -13,7 +13,7 @@
     <RootNamespace>DotNetChangelog</RootNamespace>
     <Description>A .NET Tool for generating changelog based on .NET project dependencies, particularly useful for mono repos.</Description>
     <PackageProjectUrl>https://github.com/wanga7/dotnet-changelog</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/wanga7/dotnet-changelog/blob/main/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/wanga7/dotnet-changelog</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
