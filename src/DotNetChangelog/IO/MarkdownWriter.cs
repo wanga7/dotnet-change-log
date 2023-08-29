@@ -41,14 +41,14 @@ public class MarkdownWriter : ChangelogWriter
     {
         List<string> lines = new();
         IReadOnlyList<Changelog> changelogs = continuousChangelog.SortedChangelogs;
-        foreach ((_, VersionTag toTag, IReadOnlyList<GitCommit> commits) in changelogs)
+        foreach (Changelog changelog in changelogs)
         {
             lines.Add(
-                toTag.IsNormalVersion()
-                    ? FormatAsH1(toTag.GetVersionInfo())
-                    : FormatAsH2(toTag.GetVersionInfo())
+                changelog.ToTag.IsNormalVersion()
+                    ? FormatAsH1(changelog.GetTitleForContinuousChangelog())
+                    : FormatAsH2(changelog.GetTitleForContinuousChangelog())
             );
-            lines.AddRange(commits.Select(FormatCommit));
+            lines.AddRange(changelog.Commits.Select(FormatCommit));
             lines.Add(string.Empty);
         }
 

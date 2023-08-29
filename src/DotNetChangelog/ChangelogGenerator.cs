@@ -2,7 +2,6 @@
 using CSharpFunctionalExtensions;
 using DotNetChangelog.Domain;
 using DotNetChangelog.IO;
-using DotNetChangelog.Utilities;
 using ShellProgressBar;
 
 namespace DotNetChangelog;
@@ -22,13 +21,13 @@ public class ChangelogGenerator
     {
         Console.WriteLine($"Analyzing changelog for {project} from {fromTag} to {toTag}...");
 
-        Result<VersionTag> fromVersionTag = fromTag.ToVersionTag();
+        Result<VersionTag> fromVersionTag = _gitHistory.GetVersionTag(fromTag);
         if (fromVersionTag.IsFailure)
         {
             return Result.Failure<Changelog>($"invalid tag \"{fromTag}\": {fromVersionTag.Error}");
         }
 
-        Result<VersionTag> toVersionTag = toTag.ToVersionTag();
+        Result<VersionTag> toVersionTag = _gitHistory.GetVersionTag(toTag);
         if (toVersionTag.IsFailure)
         {
             return Result.Failure<Changelog>($"invalid tag \"{toTag}\": {toVersionTag.Error}");

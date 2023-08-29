@@ -1,6 +1,12 @@
 ﻿namespace DotNetChangelog.Domain;
 
-public record VersionTag(string Prefix, string Version, string Suffix, string TagName);
+public record VersionTag(
+    string Prefix,
+    string Version,
+    string Suffix,
+    string TagName,
+    DateTimeOffset UtcTime
+);
 
 /// <summary>
 ///     Only compares by 'Version', ignoring 'Prefix' and 'Suffix'

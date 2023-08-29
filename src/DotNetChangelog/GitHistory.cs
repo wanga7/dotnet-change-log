@@ -1,4 +1,5 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System.Text.RegularExpressions;
+using CSharpFunctionalExtensions;
 using DotNetChangelog.Domain;
 using DotNetChangelog.Utilities;
 using LibGit2Sharp;
@@ -7,14 +8,18 @@ namespace DotNetChangelog;
 
 public class GitHistory
 {
+    // Matching a 3-number or 4-number version string, with an optional suffix starting with "-" or "_"
+    private static readonly Regex VersionTagPattern =
+        new(@"^(.+?)(\d+\.\d+\.\d+(\.\d+)?)(-.*|_.*)?$");
+
     private static readonly IComparer<VersionTag> OfficialVersionComparerDesc =
         new OfficialVersionComparerDesc();
 
-    private readonly string _repoPath;
+    private readonly IRepository _repo;
 
     public GitHistory(string repoPath)
     {
-        _repoPath = repoPath;
+        _repo = new Repository(repoPath);
     }
 
     /// <summary>
@@ -22,11 +27,9 @@ public class GitHistory
     /// </summary>
     public IReadOnlyList<GitCommit> GetHistoryDesc(string fromTag, string toTag)
     {
-        using Repository repo = new(_repoPath);
-
         if (
-            repo.Tags[fromTag].Target is not Commit fromCommit
-            || repo.Tags[toTag].Target is not Commit toCommit
+            _repo.Tags[fromTag].Target is not Commit fromCommit
+            || _repo.Tags[toTag].Target is not Commit toCommit
         )
         {
             return Array.Empty<GitCommit>();
@@ -39,7 +42,10 @@ public class GitHistory
 
         // Filter out merge commits (where commit.Parents.Count() > 1)
         commits.AddRange(
-            repo.Commits.QueryBy(filter).Where(c => c.Parents.Count() == 1).Select(c => c.Convert())
+            _repo.Commits
+                .QueryBy(filter)
+                .Where(c => c.Parents.Count() == 1)
+                .Select(c => c.Convert())
         );
 
         commits.RemoveAt(0);
@@ -53,39 +59,33 @@ public class GitHistory
         string toTagName
     )
     {
-        using Repository repo = new(_repoPath);
-        TagCollection tags = repo.Tags;
-
-        Tag fromTag = tags[fromTagName];
-        Tag toTag = tags[toTagName];
-        Result<VersionTag> fromTagVersionInfo = fromTag.ToVersionTag();
-        Result<VersionTag> toTagVersionInfo = toTag.ToVersionTag();
-
+        Result<VersionTag> fromTagVersionInfo = GetVersionTag(fromTagName);
         if (fromTagVersionInfo.IsFailure)
         {
             Console.WriteLine(
-                $"Failed to extract version info from tag \"{fromTag.FriendlyName}\": {fromTagVersionInfo.Error}"
+                $"Failed to extract version info from tag \"{fromTagName}\": {fromTagVersionInfo.Error}"
             );
             return Array.Empty<VersionTag>();
         }
 
+        Result<VersionTag> toTagVersionInfo = GetVersionTag(toTagName);
         if (toTagVersionInfo.IsFailure)
         {
             Console.WriteLine(
-                $"Failed to extract version info from tag \"{toTag.FriendlyName}\": {toTagVersionInfo.Error}"
+                $"Failed to extract version info from tag \"{toTagName}\": {toTagVersionInfo.Error}"
             );
             return Array.Empty<VersionTag>();
         }
 
         SortedList<VersionTag, VersionTag> sortedTags = new(OfficialVersionComparerDesc);
-        foreach (Tag tag in tags)
+        foreach (Tag tag in _repo.Tags)
         {
             if (!tag.Matches(pattern))
             {
                 continue;
             }
 
-            Result<VersionTag> versionTag = tag.ToVersionTag();
+            Result<VersionTag> versionTag = GetVersionTag(tag.FriendlyName);
             if (versionTag.IsFailure)
             {
                 Console.WriteLine(
@@ -106,6 +106,28 @@ public class GitHistory
         }
 
         return sortedTags.Select(t => t.Value).ToArray();
+    }
+
+    public Result<VersionTag> GetVersionTag(string tagName)
+    {
+        Tag tag = _repo.Tags[tagName];
+
+        if (tag.Target is not Commit commit)
+        {
+            return Result.Failure<VersionTag>("failed to get commit from tag");
+        }
+
+        Match match = VersionTagPattern.Match(tagName);
+        if (!match.Success)
+        {
+            return Result.Failure<VersionTag>($"cannot match regex \"{VersionTagPattern}\"");
+        }
+
+        string prefix = match.Groups[1].Value;
+        string version = match.Groups[2].Value;
+        string suffix = match.Groups[4].Value;
+
+        return Result.Success(new VersionTag(prefix, version, suffix, tagName, commit.Author.When));
     }
 
     private static bool IsBetween(VersionTag subject, VersionTag fromVersion, VersionTag toVersion)
