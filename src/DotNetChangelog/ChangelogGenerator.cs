@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using CSharpFunctionalExtensions;
+using DotNetChangelog.ConventionalCommit;
 using DotNetChangelog.Domain;
 using DotNetChangelog.IO;
 using ShellProgressBar;
@@ -80,12 +81,15 @@ public class ChangelogGenerator
                 new Changelog(
                     fromVersionTag.Value,
                     toVersionTag.Value,
-                    commitsDesc
-                        .Where(
-                            c =>
-                                commitsStates.TryGetValue(c.Hash, out bool isAffected) && isAffected
-                        )
-                        .ToArray()
+                    ConventionalCommitClassifier.Classify(
+                        commitsDesc
+                            .Where(
+                                c =>
+                                    commitsStates.TryGetValue(c.Hash, out bool isAffected)
+                                    && isAffected
+                            )
+                            .ToArray()
+                    )
                 )
             )
             : Result.Failure<Changelog>(error);

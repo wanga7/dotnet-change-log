@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using DotNetChangelog.ConventionalCommit;
 using DotNetChangelog.Domain;
 using DotNetChangelog.Utilities;
 
@@ -17,7 +18,7 @@ public class TextWriter : ChangelogWriter
     protected static IReadOnlyList<string> GetLines(Changelog changelog)
     {
         List<string> lines = new() { changelog.GetTitleForDirectChangelog() };
-        lines.AddRange(changelog.Commits.Select(c => c.Format()));
+        lines.AddRange(GetLines(changelog.ConventionalCommits));
         return lines;
     }
 
@@ -28,7 +29,7 @@ public class TextWriter : ChangelogWriter
         foreach (Changelog changelog in continuousChangelog.SortedChangelogs)
         {
             lines.Add(changelog.GetTitleForContinuousChangelog());
-            lines.AddRange(changelog.Commits.Select(commit => commit.Format()));
+            lines.AddRange(GetLines(changelog.ConventionalCommits));
             lines.Add(string.Empty);
         }
 
@@ -49,5 +50,30 @@ public class TextWriter : ChangelogWriter
         }
 
         return Result.Success(Path.GetFullPath(file));
+    }
+
+    private static IReadOnlyList<string> GetLines(ConventionalCommits commits)
+    {
+        List<string> lines = new();
+
+        if (commits.Features.Length > 0)
+        {
+            lines.Add(ConventionalCommitCategory.Feature);
+            lines.AddRange(commits.Features.Select(c => c.Format()));
+        }
+
+        if (commits.Fixes.Length > 0)
+        {
+            lines.Add(ConventionalCommitCategory.Fixes);
+            lines.AddRange(commits.Fixes.Select(c => c.Format()));
+        }
+
+        if (commits.OtherNotableChanges.Length > 0)
+        {
+            lines.Add(ConventionalCommitCategory.OtherNotableChanges);
+            lines.AddRange(commits.OtherNotableChanges.Select(c => c.Format()));
+        }
+
+        return lines.Count > 0 ? lines : new[] { ConventionalCommitCategory.NoNotableChanges };
     }
 }

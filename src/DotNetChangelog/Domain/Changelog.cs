@@ -1,5 +1,11 @@
-﻿namespace DotNetChangelog.Domain;
+﻿using DotNetChangelog.ConventionalCommit;
 
-public record Changelog(VersionTag FromTag, VersionTag ToTag, IReadOnlyList<GitCommit> Commits);
+namespace DotNetChangelog.Domain;
+
+public record Changelog(
+    VersionTag FromTag,
+    VersionTag ToTag,
+    ConventionalCommits ConventionalCommits
+);
 
 public record ContinuousChangelog(IReadOnlyList<Changelog> SortedChangelogs);
