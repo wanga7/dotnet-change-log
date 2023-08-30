@@ -52,7 +52,7 @@ public static class VersionTagExtensions
     public static bool IsPatchVersion(this VersionTag versionTag)
     {
         Version version = new(versionTag.Version);
-        return version.Build != 0 || version.Revision != 0;
+        return version.Build > 0 || version.Revision > 0; // .Build and .Revision default to -1 if undefined
     }
 
     public static bool IsNormalVersion(this VersionTag versionTag) =>
