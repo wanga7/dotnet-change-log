@@ -25,8 +25,7 @@ jobs:
       - uses: leonardochaia/dotnet-affected-action@v1
         id: dotnet_affected
         with:
-          from: ${{ github.head_ref }}
-          to: origin/${{ github.base_ref }}
+          from: origin/${{ github.base_ref }}
 
       - name: Restore dependencies
         if: success() && steps.dotnet_affected.outputs.affected != ''
