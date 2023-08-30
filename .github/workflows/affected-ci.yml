@@ -1,10 +1,7 @@
-name: branch-ci
+name: affected-ci
 
 on:
-  push:
-    branches:
-      - main
-    tags:
+  pull_request:
 
 jobs:
   build:
@@ -23,15 +20,8 @@ jobs:
       - name: Restore dotnet tools
         run: dotnet tool restore
 
-      - uses: nrwl/last-successful-commit-action@v1
-        id: last_successful_commit
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ env.GITHUB_REF_NAME }}
-          workflow_id: 'test.yml'
-
       - name: Dotnet-affected
-        run: dotnet affected --verbose --from ${{ steps.last_successful_commit.outputs.commit_hash }}
+        run: dotnet affected --verbose --from ${{ github.head_ref }} --to ${{ github.base_ref }}
 
       - name: Restore dependencies
         if: success() && steps.dotnet_affected.outputs.affected != ''
