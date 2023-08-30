@@ -10,10 +10,10 @@ public class TextWriter : ChangelogWriter
     public TextWriter(string repoDirectory, string outputDirectory)
         : base(repoDirectory, outputDirectory) { }
 
-    public override Result<string> Write(Changelog changelog) => WriteToFile(GetLines(changelog));
+    public override Result<string> Write(Changelog changelog) => PrependToFile(GetLines(changelog));
 
     public override Result<string> Write(ContinuousChangelog continuousChangelog) =>
-        WriteToFile(GetLines(continuousChangelog));
+        PrependToFile(GetLines(continuousChangelog));
 
     protected static IReadOnlyList<string> GetLines(Changelog changelog)
     {
@@ -36,13 +36,12 @@ public class TextWriter : ChangelogWriter
         return lines;
     }
 
-    private Result<string> WriteToFile(IReadOnlyList<string> lines)
+    protected static Result<string> PrependToFile(string file, string text)
     {
-        string file = Path.Combine(_outputDirectory, FileName + ".txt");
-
         try
         {
-            File.WriteAllText(file, string.Join(Environment.NewLine, lines));
+            string existingLines = File.Exists(file) ? File.ReadAllText(file) : string.Empty;
+            File.WriteAllText(file, text + Environment.NewLine + existingLines);
         }
         catch (Exception ex)
         {
@@ -50,6 +49,14 @@ public class TextWriter : ChangelogWriter
         }
 
         return Result.Success(Path.GetFullPath(file));
+    }
+
+    private Result<string> PrependToFile(IReadOnlyList<string> lines)
+    {
+        return PrependToFile(
+            Path.Combine(_outputDirectory, FileName + ".txt"),
+            string.Join(Environment.NewLine, lines)
+        );
     }
 
     private static IReadOnlyList<string> GetLines(ConventionalCommits commits)

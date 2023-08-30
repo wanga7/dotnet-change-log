@@ -5,7 +5,7 @@ using DotNetChangelog.Utilities;
 
 namespace DotNetChangelog.IO;
 
-public class MarkdownWriter : ChangelogWriter
+public class MarkdownWriter : TextWriter
 {
     public MarkdownWriter(string repoDirectory, string outputDirectory)
         : base(repoDirectory, outputDirectory) { }
@@ -17,28 +17,20 @@ public class MarkdownWriter : ChangelogWriter
 
     private Result<string> Write(IReadOnlyList<string> lines)
     {
-        string file = Path.Combine(_outputDirectory, FileName + ".md");
-
-        try
-        {
-            File.WriteAllText(file, string.Join(Environment.NewLine, lines));
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<string>(ex.ToString());
-        }
-
-        return Result.Success(Path.GetFullPath(file));
+        return PrependToFile(
+            Path.Combine(_outputDirectory, FileName + ".md"),
+            string.Join(Environment.NewLine, lines)
+        );
     }
 
-    private static IReadOnlyList<string> GetLines(Changelog changelog)
+    private static new IReadOnlyList<string> GetLines(Changelog changelog)
     {
         List<string> lines = new() { FormatAsH1(changelog.GetTitleForDirectChangelog()) };
         lines.AddRange(FormatCommits(changelog.ConventionalCommits));
         return lines;
     }
 
-    private static IReadOnlyList<string> GetLines(ContinuousChangelog continuousChangelog)
+    private static new IReadOnlyList<string> GetLines(ContinuousChangelog continuousChangelog)
     {
         List<string> lines = new();
         IReadOnlyList<Changelog> changelogs = continuousChangelog.SortedChangelogs;

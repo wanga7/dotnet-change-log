@@ -4,7 +4,7 @@ using DotNetChangelog.Domain;
 
 namespace DotNetChangelog.IO;
 
-public class JsonWriter : ChangelogWriter
+public class JsonWriter : TextWriter
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions =
         new() { WriteIndented = true };
@@ -19,18 +19,16 @@ public class JsonWriter : ChangelogWriter
 
     private Result<string> WriteAsJson<T>(T jsonObject)
     {
-        string file = Path.Combine(_outputDirectory, FileName + ".json");
-
+        string content;
         try
         {
-            string content = JsonSerializer.Serialize(jsonObject, JsonSerializerOptions);
-            File.WriteAllText(file, content);
+            content = JsonSerializer.Serialize(jsonObject, JsonSerializerOptions);
         }
         catch (Exception ex)
         {
             return Result.Failure<string>(ex.ToString());
         }
 
-        return Result.Success(Path.GetFullPath(file));
+        return PrependToFile(Path.Combine(_outputDirectory, FileName + ".json"), content);
     }
 }
