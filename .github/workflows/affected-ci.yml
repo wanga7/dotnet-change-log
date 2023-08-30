@@ -21,7 +21,7 @@ jobs:
         run: dotnet tool restore
 
       - name: Dotnet-affected
-        run: dotnet affected --verbose --from ${{ github.head_ref }} --to ${{ github.base_ref }}
+        run: dotnet affected --verbose --from origin/${{ github.base_ref }} --to ${{ github.head_ref }}
 
       - name: Restore dependencies
         if: success() && steps.dotnet_affected.outputs.affected != ''
