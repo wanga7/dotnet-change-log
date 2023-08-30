@@ -28,7 +28,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ env.GITHUB_REF_NAME }}
-          workflow_id: 'branch-ci.yml'
+          workflow_id: 'test.yml'
 
       - name: Dotnet-affected
         run: dotnet affected --verbose --from ${{ steps.last_successful_commit.outputs.commit_hash }}
