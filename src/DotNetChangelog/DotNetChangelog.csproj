@@ -9,7 +9,7 @@
     <ToolCommandName>dotnet-change-log</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <PackageId>dotnet-change-log</PackageId>
-    <Version>0.6.0</Version>
+    <Version>0.7.0</Version>
     <RootNamespace>DotNetChangelog</RootNamespace>
     <Description>A .NET Tool for generating changelog based on .NET project dependencies, particularly useful for mono repos.</Description>
     <PackageProjectUrl>https://github.com/wanga7/dotnet-changelog</PackageProjectUrl>
