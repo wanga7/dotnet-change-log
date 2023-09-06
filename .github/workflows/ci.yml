@@ -30,4 +30,4 @@ jobs:
       run: dotnet build --no-restore --configuration Release DotNetChangelog.sln -bl
       
     - name: Test
-      run: dotnet test --no-build --verbosity normal --configuration Release DotNetChangelog.sln /p:CollectCoverage=true -bl
+      run: dotnet test --no-build --configuration Release DotNetChangelog.sln /p:CollectCoverage=true -bl
