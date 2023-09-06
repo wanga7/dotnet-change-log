@@ -57,12 +57,4 @@ public static class VersionTagExtensions
 
     public static bool IsNormalVersion(this VersionTag versionTag) =>
         !versionTag.IsPatchVersion() && !versionTag.IsPreRelease();
-
-    public static bool BelongsToTheSameMinorVersion(this VersionTag lhs, VersionTag rhs)
-    {
-        Version lhsVersion = new(lhs.Version);
-        Version rhsVersion = new(rhs.Version);
-
-        return lhsVersion.Major == rhsVersion.Major && lhsVersion.Minor == rhsVersion.Minor;
-    }
 }
