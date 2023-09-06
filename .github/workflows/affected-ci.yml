@@ -1,40 +1,43 @@
-name: affected-ci
+# There's currently a bug with dotnet-affected that it does not detect changes
+# for commits that contain only deletion/renaming changes.
 
-on:
-  pull_request:
+# name: affected-ci
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+# on:
+#   pull_request:
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 15
 
     
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+#     steps:
+#       - uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 6.0.x
+#       - name: Setup .NET
+#         uses: actions/setup-dotnet@v3
+#         with:
+#           dotnet-version: 6.0.x
 
-      - name: Restore dotnet tools
-        run: dotnet tool restore
+#       - name: Restore dotnet tools
+#         run: dotnet tool restore
 
-      - uses: leonardochaia/dotnet-affected-action@v1
-        id: dotnet_affected
-        with:
-          from: origin/${{ github.base_ref }}
+#       - uses: leonardochaia/dotnet-affected-action@v1
+#         id: dotnet_affected
+#         with:
+#           from: origin/${{ github.base_ref }}
 
-      - name: Restore dependencies
-        if: success() && steps.dotnet_affected.outputs.affected != ''
-        run: dotnet restore affected.proj
+#       - name: Restore dependencies
+#         if: success() && steps.dotnet_affected.outputs.affected != ''
+#         run: dotnet restore affected.proj
 
-      - name: Build
-        if: success() && steps.dotnet_affected.outputs.affected != ''
-        run: dotnet build --configuration Release --no-restore affected.proj
+#       - name: Build
+#         if: success() && steps.dotnet_affected.outputs.affected != ''
+#         run: dotnet build --configuration Release --no-restore affected.proj
 
-      - name: Test
-        if: success() && steps.dotnet_affected.outputs.affected != ''
-        run: dotnet test --no-restore --no-build --configuration Release --verbosity normal affected.proj
+#       - name: Test
+#         if: success() && steps.dotnet_affected.outputs.affected != ''
+#         run: dotnet test --no-restore --no-build --configuration Release --verbosity normal affected.proj
