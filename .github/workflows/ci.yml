@@ -24,10 +24,10 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Restore dependencies
-      run: dotnet restore DotNetChangelog.sln
+      run: dotnet restore DotNetChangelog.sln -bl
 
     - name: Build
-      run: dotnet build --no-restore --configuration Release DotNetChangelog.sln
+      run: dotnet build --no-restore --configuration Release DotNetChangelog.sln -bl
       
     - name: Test
-      run: dotnet test --no-build --verbosity normal --configuration Release DotNetChangelog.sln
+      run: dotnet test --no-build --verbosity normal --configuration Release DotNetChangelog.sln /p:CollectCoverage=true -bl
